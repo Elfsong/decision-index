@@ -1,0 +1,17 @@
+# Decision Index submissions
+
+## JEV FLAN-T5 encoder 342M public-v2
+
+| Model | Model revision | Public 0.3 results | Engine / inference revision | Hardware and settings |
+| --- | --- | --- | --- | --- |
+| [JEV FLAN-T5 encoder 342M public-v2](https://huggingface.co/Elfsong/jev-flan-t5-large-20261017-public-v2/tree/97b334940005438cfd846ab14e0d102218719962) (342,283,777 parameters) | `97b334940005438cfd846ab14e0d102218719962` | [scores.json](https://huggingface.co/datasets/Elfsong/jev-decision-index-20261017-public-v2/blob/ddc0510c86a2734d20f2b89da6953f710f510936/runs/jev-t5-20261017-public-v2/scores.json): **22.02**, complete | `jev_encoder.engine:EncoderEngine`; [code](https://huggingface.co/datasets/Elfsong/jev-decision-index-20261017-public-v2/tree/ddc0510c86a2734d20f2b89da6953f710f510936/inference) at `ddc0510c86a2734d20f2b89da6953f710f510936` | 1× H100 80GB; FP32 weights, BF16 autocast, FP32 softmax; eager attention; temperature 1.3380662202835083; batch size 2 questions within one request, 4 CPU threads |
+
+Weights, results and inference code are public. The model repository root is the evaluated step-1,000 checkpoint. Capacity remains 7,999 serialized tokens per question (including all candidates) and 512 choices; there is no truncation or option removal. Text `choice` and `noul` are supported, with no generation, quantization, ensembling or per-benchmark routing.
+
+The full 0.3 suite has 140,620 request records: 139,774 `ok`, 846 `unsupported`, zero runtime errors. After the 442 official exclusions, all 140,178 scoreable requests are present: 139,650 `ok`, 528 `unsupported`. The original compact prediction bytes are preserved in `results.jsonl.gz`. All official suite and exclusion hashes pass; an independent full rescore reproduces the scores exactly.
+
+The [export validation](https://huggingface.co/datasets/Elfsong/jev-decision-index-20261017-public-v2/blob/ddc0510c86a2734d20f2b89da6953f710f510936/inference/validation.json) covers 100 deterministic requests from all 43 reported benchmarks, reproducing every status, answer and probability exactly (maximum probability difference 0.0), and verifies rejection beyond both declared capacity limits. Core inference files match the evaluated source byte for byte; calibration helpers are extracted unchanged. Official runner/scorer: `f8552a13b643d39f61185f5951bb5fed16bedf51`. [Pinned setup, public reproduction and private engine instructions](https://huggingface.co/datasets/Elfsong/jev-decision-index-20261017-public-v2/blob/ddc0510c86a2734d20f2b89da6953f710f510936/inference/README.md).
+
+Training disclosure: 1,000 cross-entropy updates on 40,000 examples from upstream training splits of BANKING77, CLINC, WinoGrande, HellaSwag and When2Call, plus 24,000 Tasksource rehearsal examples. These five tasks are in-domain; public task scores informed source selection. Benchmark gold labels were not used for gradients, checkpoint selection or temperature fitting. [Pinned sources, counts and split hashes](https://huggingface.co/datasets/Elfsong/jev-decision-index-20261017-public-v2/blob/ddc0510c86a2734d20f2b89da6953f710f510936/training-provenance.json). Exact/lexical input overlap checks do not guarantee absence of semantic or pretraining overlap.
+
+The 22.02 result is the public component only. H100 diagnostic latency: median 17.0 ms, mean 57.4 ms, p95 247.7 ms. Please run maintainer private evaluations and official RTX PRO 6000 latency checks on this pinned model.
